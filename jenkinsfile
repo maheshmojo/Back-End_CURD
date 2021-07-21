@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "M3"
+    }
+
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'Master-main', url: 'https://github.com/maheshmojo/Back-End_CURD.git'
+            }
+        }
+        stage('Build'){
+            steps{
+                // To run Maven on a Windows agent, use
+                bat "mvn -Dmaven.test.failure.ignore=true clean package"
+            }
+        }
+        stage('Sonar Scanner'){
+            steps{
+                //To run code quality gate for maven build
+                bat "mvn sonar:sonar -Dsonar.projectKey=Test-Backend -Dsonar.host.url=http://localhost:9092 -Dsonar.login=021e315ea00e3cb734b0b6ec3c97850988639be3"
+            }
+        }
+        // stage('Store Artifact to Nexus3'){
+        //     steps{
+        //         nexusArtifactUploader artifacts: [
+        //             [
+        //             artifactId:'Student',
+        //             classifier: '',
+        //             file: 'target/Student-1.0.0.jar',
+        //             type: 'jar'
+        //             ]
+        //         ], 
+        //         credentialsId: 'nexus3',
+        //         groupId: 'com.main',
+        //         nexusUrl: 'localhost:8081',
+        //         nexusVersion: 'nexus3',
+        //         protocol: 'http',
+        //         repository: 'Students-Web/',
+        //         version: '1.0.0'
+        //     }
+        // }
+        stage('Build Dockerimage') {
+            steps {
+               bat "docker build --rm -t imagetest2 ."
+               
+               
+            }
+        }
+        stage('Tag Dockerimage') {
+            steps {
+                
+              bat "docker tag imagetest2 192.168.33.10:8123/back-end:mytag"
+            
+            }       
+            
+    
+         }
+         stage('Push Dockerimage') {
+            steps {
+                
+              bat"docker login -u docker -p admin@123 192.168.33.10:8123"
+              bat "docker push 192.168.33.10:8123/back-end:mytag"  
+            }       
+            
+    
+         }
+    }
+}
