@@ -6,13 +6,6 @@ pipeline {
         maven "M3"
     }
 
-    stages {
-        stage('Checkout SCM') {
-            steps {
-                // Get some code from a GitHub repository
-                git branch: 'Master-main', url: 'https://github.com/maheshmojo/Back-End_CURD.git'
-            }
-        }
         stage('Build'){
             steps{
                 // To run Maven on a Windows agent, use
